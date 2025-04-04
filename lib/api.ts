@@ -17,3 +17,4 @@ export const fetchTasks = async () => {
 };
 
 export type Tasks = Awaited<ReturnType<typeof fetchTasks>>;
+export type Task = Tasks[number];

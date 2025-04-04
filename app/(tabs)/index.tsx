@@ -5,6 +5,7 @@ import { Text, View } from '@/components/Themed';
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import { fetchTasks, Tasks } from "@/lib/api";
+import TaskCard from "@/components/TaskCard";
 
 export default function TabOneScreen() {
   const [tasks, setTasks] = useState<Tasks>([]);
@@ -19,7 +20,7 @@ export default function TabOneScreen() {
         <FlatList
           data={tasks}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <Text>{item.title}</Text>}
+          renderItem={({ item }) => <TaskCard task={item} />}
         />
       </View>
     );
