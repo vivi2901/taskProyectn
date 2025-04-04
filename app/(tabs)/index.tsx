@@ -5,25 +5,14 @@ import { Text, View } from '@/components/Themed';
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import AddTaskForm from "@/components/AddTaskForm";
+import { fetchTasks, Tasks } from "@/lib/api";
 
 export default function TabOneScreen() {
 
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState<Tasks>([]);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      const { data, error } = await supabase.from("tasks").select("*").order("created_at", {
-        ascending: false,
-      });
-
-      if (error) {
-        console.log(error);
-      } else {
-        setTasks(data);
-      }
-    };
-
-    fetchTasks();
+    fetchTasks().then((data) => setTasks(data));
   }, []);
 
   const handleSubmit = async (title: string) => {
