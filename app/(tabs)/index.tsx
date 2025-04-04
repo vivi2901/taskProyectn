@@ -1,14 +1,53 @@
-import { StyleSheet } from 'react-native';
+import { FlatList, StyleSheet } from "react-native";
 
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
+import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabase";
+import AddTaskForm from "@/components/AddTaskForm";
 
 export default function TabOneScreen() {
+
+  const [tasks, setTasks] = useState([]);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const { data, error } = await supabase.from("tasks").select("*").order("created_at", {
+        ascending: false,
+      });
+
+      if (error) {
+        console.log(error);
+      } else {
+        setTasks(data);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  const handleSubmit = async (title: string) => {
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert({ title })
+      .select();
+    if (error) {
+      console.log(error);
+    } else {
+      setTasks([data[0], ...tasks]);
+    }
+  };
+
   return (
     <View style={styles.container}>
+      <AddTaskForm onSubmit={handleSubmit} />
       <Text style={styles.title}>Tab One</Text>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/index.tsx" />
+      <FlatList
+        data={tasks}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <Text>{item.title}</Text>}
+      />
     </View>
   );
 }
