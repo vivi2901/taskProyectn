@@ -1,59 +1,66 @@
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
-
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
+import { Tabs, useRouter } from 'expo-router';
+import { Pressable, StyleSheet } from 'react-native';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const router = useRouter();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
+        tabBarStyle: styles.tabBar,
+        headerShown: true, 
+        headerTitle: 'TaskFlow',
       }}>
+      
+      {/* Ocultamos la pestaña "index" en el tabBar */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
-          ),
+          href: null, 
         }}
       />
+
+      {/* Botón flotante en el centro */}
       <Tabs.Screen
         name="two"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Nueva Tarea',
+          tabBarButton: () => (
+            <Pressable style={styles.floatingButton} onPress={() => router.push('/two')}>
+              <FontAwesome name="plus" size={28} color="white" />
+            </Pressable>
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+// Estilos
+const styles = StyleSheet.create({
+  tabBar: {
+    position: 'absolute',
+    height: 60,
+    backgroundColor: 'white',
+    borderTopWidth: 0, // Quita la línea superior en Android
+    elevation: 0,
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 10, // Ajusta la distancia desde la parte inferior
+    alignSelf: 'center', // Centra el botón en la barra
+    width: 65,
+    height: 65,
+    borderRadius: 35,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+});
