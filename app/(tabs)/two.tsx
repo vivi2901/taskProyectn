@@ -1,11 +1,11 @@
 import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
-
-import { FlatList, StyleSheet } from "react-native";
+import { Text, View, Button } from '@/components/Themed';
+import { FlatList, StyleSheet,  Alert} from "react-native";
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import AddTaskForm from "@/components/AddTaskForm";
 import { fetchTasks, Tasks } from "@/lib/api";
+import { useUserInfo } from '@/lib/userContext';
 
 export default function TabTwoScreen() {
   const [tasks, setTasks] = useState<Tasks>([]);
@@ -18,16 +18,21 @@ export default function TabTwoScreen() {
     const { data, error } = await supabase
       .from("tasks")
       .insert([{ title, description }])
-      .select();
+      .select("*, profile: profiles(username)");
     if (error) {
       console.log(error);
+      Alert.alert("Server Error", error.message);
     } else {
       setTasks([data[0], ...tasks]);
     }
   };
 
+  const { profile } = useUserInfo();
+
   return (
     <View style={styles.container}>
+      <Text>{profile?.username}</Text>
+      <Button title="Cerrar sesión" onPress={() => supabase.auth.signOut()} />
       <AddTaskForm onSubmit={handleSubmit} />
     </View>
   );

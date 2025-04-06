@@ -6,8 +6,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import Colors from '@/constants/Colors';
-
+import React, { useState } from "react";
+import AuthScreen from './AuthScreen';
 import { useColorScheme } from '@/components/useColorScheme';
+import { AuthProvider, useUserInfo } from '@/lib/userContext';
 
 const darkTheme = {
   ...DarkTheme,
@@ -58,7 +60,19 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
+  
+  return (
+    <AuthProvider>
+      <AuthGate />
+    </AuthProvider>
+  );
+}
 
+function AuthGate() {
+  const { session } = useUserInfo();
+  if (!session) {
+    return <AuthScreen />;
+  }
   return <RootLayoutNav />;
 }
 
@@ -66,7 +80,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? darkTheme : lightTheme}>
+    <ThemeProvider value={colorScheme === 'light' ? lightTheme : lightTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
