@@ -13,8 +13,7 @@ export default function TabLayout() {
         headerShown: true, 
         headerTitle: 'TaskFlow',
       }}>
-      
-      {/* Ocultamos la pestaña "index" en el tabBar */}
+        
       <Tabs.Screen
         name="index"
         options={{
@@ -22,7 +21,6 @@ export default function TabLayout() {
         }}
       />
 
-      {/* Botón flotante en el centro */}
       <Tabs.Screen
         name="two"
         options={{
@@ -32,6 +30,13 @@ export default function TabLayout() {
               <FontAwesome name="plus" size={28} color="white" />
             </Pressable>
           ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="three"
+        options={{
+          href: null, 
         }}
       />
     </Tabs>
