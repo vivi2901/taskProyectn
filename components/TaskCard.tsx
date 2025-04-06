@@ -1,15 +1,5 @@
 import { useState, useRef } from "react";
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  Pressable,
-  LayoutRectangle,
-  findNodeHandle,
-  UIManager,
-  Alert,
-} from "react-native";
+import {  View,  TouchableOpacity,  StyleSheet,  Modal,  Pressable,  LayoutAnimation,  LayoutRectangle,  findNodeHandle,  UIManager,  Alert,} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { Task } from "@/lib/api";
 import { Card, Text } from "./Themed";
@@ -18,10 +8,11 @@ import { router } from "expo-router";
 
 interface Props {
   task: Task;
-  onDelete?: (id: string) => void; // nueva prop para notificar al padre
+  onDelete?: (id: string) => void;
+  onComplete?: (task: Task) => void;
 }
 
-export default function TaskCard({ task, onDelete }: Props) {
+export default function TaskCard({ task, onDelete, onComplete }: Props) {
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState<LayoutRectangle | null>(null);
   const buttonRef = useRef<View>(null);
@@ -36,9 +27,12 @@ export default function TaskCard({ task, onDelete }: Props) {
       .update({ completed: !isCompleted })
       .eq("id", task.id);
 
-    if (!error) setIsCompleted(!isCompleted);
-    else console.error("Error al actualizar tarea:", error);
-
+    if (!error) {
+      setIsCompleted(!isCompleted);
+      if (onComplete) onComplete({ ...task, completed: !isCompleted });
+    } else {
+      console.error("Error al actualizar tarea:", error);
+    }
     setLoading(false);
   };
 
@@ -48,7 +42,7 @@ export default function TaskCard({ task, onDelete }: Props) {
       console.error("Error al eliminar tarea:", error);
     } else {
       console.log("Tarea eliminada:", task.id);
-      onDelete?.(task.id); // Notificar al componente padre
+      onDelete?.(task.id);
       setMenuVisible(false);
     }
   };
@@ -139,9 +133,7 @@ export default function TaskCard({ task, onDelete }: Props) {
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => {
-                  //router.push(`/three?id=${task.id}`);
                   router.push({ pathname: '/three', params: { id: task.id } });
-                  //console.log("Editar", task.id);
                   setMenuVisible(false);
                 }}
               >
@@ -150,7 +142,7 @@ export default function TaskCard({ task, onDelete }: Props) {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={confirmDelete} // <-- llamada a confirmación
+                onPress={confirmDelete}
               >
                 <Feather name="trash-2" size={16} color="red" />
                 <Text style={[styles.menuText, { color: "red" }]}>Eliminar</Text>
