@@ -8,6 +8,7 @@ import {
   LayoutRectangle,
   findNodeHandle,
   UIManager,
+  Alert,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { Task } from "@/lib/api";
@@ -16,9 +17,10 @@ import { supabase } from "@/lib/supabase";
 
 interface Props {
   task: Task;
+  onDelete?: (id: string) => void; // nueva prop para notificar al padre
 }
 
-export default function TaskCard({ task }: Props) {
+export default function TaskCard({ task, onDelete }: Props) {
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuPosition, setMenuPosition] = useState<LayoutRectangle | null>(null);
   const buttonRef = useRef<View>(null);
@@ -37,6 +39,28 @@ export default function TaskCard({ task }: Props) {
     else console.error("Error al actualizar tarea:", error);
 
     setLoading(false);
+  };
+
+  const deleteTask = async () => {
+    const { error } = await supabase.from("tasks").delete().eq("id", task.id);
+    if (error) {
+      console.error("Error al eliminar tarea:", error);
+    } else {
+      console.log("Tarea eliminada:", task.id);
+      onDelete?.(task.id); // Notificar al componente padre
+      setMenuVisible(false);
+    }
+  };
+
+  const confirmDelete = () => {
+    Alert.alert(
+      "Eliminar tarea",
+      "¿Estás seguro de que quieres eliminar esta tarea?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Eliminar", style: "destructive", onPress: deleteTask },
+      ]
+    );
   };
 
   const openMenu = () => {
@@ -123,10 +147,7 @@ export default function TaskCard({ task }: Props) {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={() => {
-                  console.log("Eliminar", task.id);
-                  setMenuVisible(false);
-                }}
+                onPress={confirmDelete} // <-- llamada a confirmación
               >
                 <Feather name="trash-2" size={16} color="red" />
                 <Text style={[styles.menuText, { color: "red" }]}>Eliminar</Text>
