@@ -1,8 +1,17 @@
 import { useState, useRef } from "react";
-import { View, TouchableOpacity, StyleSheet, Modal, Pressable } from "react-native";
-import { Feather,  FontAwesome  } from "@expo/vector-icons";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  Pressable,
+  LayoutRectangle,
+  findNodeHandle,
+  UIManager,
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
 import { Task } from "@/lib/api";
-import { Card, Text, useThemeColor } from "./Themed";
+import { Card, Text } from "./Themed";
 import { supabase } from "@/lib/supabase";
 
 interface Props {
@@ -10,91 +19,124 @@ interface Props {
 }
 
 export default function TaskCard({ task }: Props) {
-    const [menuVisible, setMenuVisible] = useState(false);
-    const menuRef = useRef(null);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<LayoutRectangle | null>(null);
+  const buttonRef = useRef<View>(null);
 
-    const color = useThemeColor({}, "primary");
-    const [isCompleted, setIsCompleted] = useState(task.completed);
-    const [loading, setLoading] = useState(false);
-  
-    const toggleCompleted = async () => {
-      setLoading(true);
-      const { error } = await supabase
-        .from("tasks")
-        .update({ completed: !isCompleted })
-        .eq("id", task.id);
-  
-      if (!error) {
-        setIsCompleted(!isCompleted);
-      } else {
-        console.error("Error al actualizar tarea:", error);
-      }
-      setLoading(false);
-    };
+  const [isCompleted, setIsCompleted] = useState(task.completed);
+  const [loading, setLoading] = useState(false);
 
-    return (
-        <Card style={styles.container}>
-            {/* Checkbox */}
-            <TouchableOpacity
-                style={styles.checkbox}
-                onPress={toggleCompleted}
-                disabled={loading}
+  const toggleCompleted = async () => {
+    setLoading(true);
+    const { error } = await supabase
+      .from("tasks")
+      .update({ completed: !isCompleted })
+      .eq("id", task.id);
+
+    if (!error) setIsCompleted(!isCompleted);
+    else console.error("Error al actualizar tarea:", error);
+
+    setLoading(false);
+  };
+
+  const openMenu = () => {
+    const handle = findNodeHandle(buttonRef.current);
+    if (handle) {
+      UIManager.measure(handle, (_x, _y, width, height, pageX, pageY) => {
+        setMenuPosition({ x: pageX, y: pageY, width, height });
+        setMenuVisible(true);
+      });
+    }
+  };
+
+  return (
+    <Card style={styles.container}>
+      {/* Checkbox */}
+      <TouchableOpacity
+        style={styles.checkbox}
+        onPress={toggleCompleted}
+        disabled={loading}
+      >
+        {isCompleted && <Feather name="check" size={16} color="#4CAF50" />}
+      </TouchableOpacity>
+
+      {/* Contenido de la tarea */}
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text
+            style={[
+              styles.title,
+              isCompleted && {
+                textDecorationLine: "line-through",
+                color: "#999",
+              },
+            ]}
+          >
+            {task.title}
+          </Text>
+          {/* Botón de opciones */}
+          <TouchableOpacity ref={buttonRef} style={styles.optionsButton} onPress={openMenu}>
+            <Feather name="more-vertical" size={20} color="#666" />
+          </TouchableOpacity>
+        </View>
+        <Text
+          style={[
+            styles.description,
+            isCompleted && {
+              textDecorationLine: "line-through",
+              color: "#999",
+            },
+          ]}
+        >
+          {task.description}
+        </Text>
+      </View>
+
+      {/* Menú flotante */}
+      <Modal
+        visible={menuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <Pressable style={styles.fullscreenOverlay} onPress={() => setMenuVisible(false)}>
+          {menuPosition && (
+            <View
+              style={[
+                styles.menuContainer,
+                {
+                  position: "absolute",
+                  top: menuPosition.y + menuPosition.height + 4,
+                  left: menuPosition.x - 120 + menuPosition.width,
+                },
+              ]}
             >
-                {isCompleted && <Feather name="check" size={16} color="#4CAF50" />}
-            </TouchableOpacity>
-            {/* Contenido Derecha*/}
-            <View style={styles.content}>
-                {/* Titulo */}
-                <View style={styles.header}>
-                <Text
-                    style={[
-                    styles.title,
-                    isCompleted && { textDecorationLine: "line-through", color: "#999" },
-                    ]}
-                >
-                    {task.title}
-                </Text>
-                {/* Botón de more options */}
-                <TouchableOpacity
-                    ref={menuRef} // Guarda referencia para el menú
-                    style={styles.optionsButton}
-                    onPress={() => setMenuVisible(true)}
-                >
-                    <Feather name="more-vertical" size={20} color="#666" />
-                </TouchableOpacity>
-                </View>
-                <Text style={[
-                    styles.description,
-                    isCompleted && { textDecorationLine: "line-through", color: "#999" },
-                    ]}>
-                    {task.description}
-                </Text>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  console.log("Editar", task.id);
+                  setMenuVisible(false);
+                }}
+              >
+                <Feather name="edit-2" size={16} color="black" />
+                <Text style={styles.menuText}>Editar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  console.log("Eliminar", task.id);
+                  setMenuVisible(false);
+                }}
+              >
+                <Feather name="trash-2" size={16} color="red" />
+                <Text style={[styles.menuText, { color: "red" }]}>Eliminar</Text>
+              </TouchableOpacity>
             </View>
-            {/* Menú flotante */}
-            <Modal
-                transparent
-                visible={menuVisible}
-                animationType="fade"
-                onRequestClose={() => setMenuVisible(false)}
-            >
-                <Pressable
-                style={styles.overlay}
-                onPress={() => setMenuVisible(false)} // Cierra al hacer clic fuera
-                >
-                    <View style={styles.menuContainer}>
-                        <TouchableOpacity style={styles.menuItem} onPress={() => console.log("Editar")}>
-                        <Feather name="edit-2" size={16} color="#333" />
-                        <Text style={styles.menuText}>Editar</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.menuItem} onPress={() => console.log("Eliminar")}>
-                        <Feather name="trash" size={16} color="#333" />
-                        <Text style={styles.menuText}>Eliminar</Text>
-                        </TouchableOpacity>
-                    </View>
-                </Pressable>
-            </Modal>
-        </Card>
-    );
+          )}
+        </Pressable>
+      </Modal>
+    </Card>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -129,9 +171,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     flexShrink: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-     alignItems: "center",
   },
   description: {
     fontSize: 14,
@@ -141,25 +180,19 @@ const styles = StyleSheet.create({
   optionsButton: {
     padding: 4,
   },
-  overlay: {
+  fullscreenOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    justifyContent: "center",
-    alignItems: "center",
   },
   menuContainer: {
     backgroundColor: "#fff",
-    padding: 12,
+    padding: 8,
     borderRadius: 8,
     width: 150,
-    position: "absolute",
-    top: 60,
-    right: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 6,
   },
   menuItem: {
     flexDirection: "row",

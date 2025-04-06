@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Pressable,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 interface Props {
@@ -13,33 +20,46 @@ export default function TaskOptions({ onEdit, onDelete }: Props) {
   return (
     <View>
       {/* Botón de opciones */}
-      <TouchableOpacity onPress={() => setVisible(true)} style={styles.optionsButton}>
+      <TouchableOpacity
+        onPress={() => setVisible(true)}
+        style={styles.optionsButton}
+      >
         <Feather name="more-vertical" size={20} color="#666" />
       </TouchableOpacity>
 
-      {/* Modal para mostrar las opciones */}
+      {/* Modal flotante */}
       <Modal
         transparent
-        visible={visible}
         animationType="fade"
+        visible={visible}
         onRequestClose={() => setVisible(false)}
       >
-        <TouchableOpacity
-          style={styles.overlay}
-          activeOpacity={1}
-          onPress={() => setVisible(false)}
-        >
-          <View style={styles.menu}>
-            <TouchableOpacity style={styles.menuItem} onPress={onEdit}>
+        {/* Capa que cubre toda la pantalla para detectar toques fuera */}
+        <Pressable style={styles.overlay} onPress={() => setVisible(false)}>
+          {/* Espacio para permitir clics solo dentro del menú */}
+          <Pressable style={styles.menuContainer}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onEdit();
+                setVisible(false);
+              }}
+            >
               <Feather name="edit-2" size={16} color="black" />
               <Text style={styles.menuText}>Editar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={onDelete}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                onDelete();
+                setVisible(false);
+              }}
+            >
               <Feather name="trash-2" size={16} color="red" />
               <Text style={[styles.menuText, { color: "red" }]}>Eliminar</Text>
             </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );
@@ -47,32 +67,34 @@ export default function TaskOptions({ onEdit, onDelete }: Props) {
 
 const styles = StyleSheet.create({
   optionsButton: {
-    padding: 8,
+    padding: 4,
   },
   overlay: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.2)",
+    backgroundColor: "transparent",
+    justifyContent: "flex-start",
+    alignItems: "flex-end",
+    paddingTop: 50, // Espacio desde arriba (ajusta si es necesario)
+    paddingRight: 20, // Espacio desde la derecha
   },
-  menu: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+  menuContainer: {
+    backgroundColor: "#fff",
+    padding: 8,
+    borderRadius: 8,
+    width: 150,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 6,
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   menuText: {
-    marginLeft: 10,
-    fontSize: 16,
+    marginLeft: 8,
+    fontSize: 14,
   },
 });
