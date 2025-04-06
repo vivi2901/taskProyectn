@@ -14,6 +14,7 @@ import { Feather } from "@expo/vector-icons";
 import { Task } from "@/lib/api";
 import { Card, Text } from "./Themed";
 import { supabase } from "@/lib/supabase";
+import { router } from "expo-router";
 
 interface Props {
   task: Task;
@@ -138,7 +139,9 @@ export default function TaskCard({ task, onDelete }: Props) {
               <TouchableOpacity
                 style={styles.menuItem}
                 onPress={() => {
-                  console.log("Editar", task.id);
+                  //router.push(`/three?id=${task.id}`);
+                  router.push({ pathname: '/three', params: { id: task.id } });
+                  //console.log("Editar", task.id);
                   setMenuVisible(false);
                 }}
               >
