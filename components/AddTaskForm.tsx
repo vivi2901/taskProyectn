@@ -1,7 +1,6 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { View, TextInput } from "./Themed";
-import { Feather } from '@expo/vector-icons';
 
 interface Props {
   onSubmit: (title: string, description: string) => void;
@@ -11,6 +10,7 @@ export default function AddTaskForm({ onSubmit }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+  // Calcular la fecha actual
   const currentDate = new Date();
   const year = currentDate.getFullYear();
   const month = currentDate.toLocaleString('es-ES', { month: 'long' });
@@ -26,15 +26,13 @@ export default function AddTaskForm({ onSubmit }: Props) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton}>
-        <Feather name="chevron-left" size={40} color="black" />
-      </TouchableOpacity>
-
-      <View>
+      {/* Mostrar la fecha */}
+      <View style={styles.dateContainer}>
         <Text style={styles.yearText}>{year}</Text>
         <Text style={styles.dateText}>{day} de {month}</Text>
       </View>
 
+      {/* Formulario */}
       <View style={styles.formContainer}>
         <TextInput 
           style={styles.input}
@@ -61,11 +59,15 @@ export default function AddTaskForm({ onSubmit }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: '100%',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
     padding: 16,
   },
-  backButton: {
-    justifyContent: 'center',
+  dateContainer: {
+    marginBottom: 20,
+    alignItems: 'flex-start',
   },
   yearText: {
     fontSize: 32,
@@ -79,9 +81,11 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   formContainer: {
-    flex: 1,
+    width: '100%',
+    alignItems: 'center',
   },
   input: {
+    width: '100%',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     paddingVertical: 10,
@@ -98,6 +102,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
+    width: '50%',
   },
   buttonText: {
     color: '#fff',
@@ -105,14 +110,3 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
-
-  //container: {
-    //width: "100%",
-    //padding: 16,
-  //},
-  //input: {
-    //borderColor: "gray",
-    //borderWidth: 1,
-    //padding: 8,
-  //},
-//});
