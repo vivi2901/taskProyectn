@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet, Text } from 'react-native';
+import { View, TextInput, Alert, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 
@@ -9,9 +9,9 @@ export default function TabThreeScreen() {
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [createdAt, setCreatedAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Validación de id
   useEffect(() => {
     if (!id || Array.isArray(id)) {
       Alert.alert('Error', 'ID inválido');
@@ -32,6 +32,9 @@ export default function TabThreeScreen() {
 
       setTitle(data.title ?? '');
       setDescription(data.description ?? '');
+      if (data.created_at) {
+        setCreatedAt(new Date(data.created_at));
+      }
     };
 
     fetchTask();
@@ -48,7 +51,7 @@ export default function TabThreeScreen() {
     const { error } = await supabase
       .from('tasks')
       .update({ title, description })
-      .eq('id', id as string); // ya validamos que es string
+      .eq('id', id as string);
 
     setLoading(false);
 
@@ -57,48 +60,102 @@ export default function TabThreeScreen() {
       console.error('Supabase update error:', error);
     } else {
       Alert.alert('Éxito', 'Tarea actualizada correctamente');
-      router.back(); // volver a la pantalla anterior
+      router.back();
     }
   };
 
+  // Formatear la fecha usando createdAt
+  let yearText = '';
+  let dateText = '';
+  if (createdAt) {
+    yearText = createdAt.getFullYear().toString();
+    const month = createdAt.toLocaleString('es-ES', { month: 'long' });
+    const day = createdAt.getDate();
+    dateText = `${day} de ${month}`;
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Título</Text>
-      <TextInput
-        style={styles.input}
-        value={title}
-        onChangeText={setTitle}
-        placeholder="Título de la tarea"
-      />
-      <Text style={styles.label}>Descripción</Text>
-      <TextInput
-        style={[styles.input, { height: 100 }]}
-        value={description}
-        onChangeText={setDescription}
-        placeholder="Descripción"
-        multiline
-      />
-      <Button title={loading ? "Guardando..." : "Guardar cambios"} onPress={handleUpdate} disabled={loading} />
+      {createdAt && (
+        <View style={styles.dateContainer}>
+          <Text style={styles.yearText}>{yearText}</Text>
+          <Text style={styles.dateText}>{dateText}</Text>
+        </View>
+      )}
+      <View style={styles.formContainer}>
+        <TextInput
+          style={styles.input}
+          value={title}
+          onChangeText={setTitle}
+          placeholder="Título de la tarea"
+          placeholderTextColor="#999"
+        />
+        <TextInput
+          style={[styles.input, styles.descriptionInput]}
+          value={description}
+          onChangeText={setDescription}
+          placeholder="Descripción de la tarea"
+          placeholderTextColor="#999"
+          multiline
+        />
+        <TouchableOpacity style={styles.button} onPress={handleUpdate} disabled={loading}>
+          <Text style={styles.buttonText}>{loading ? "Guardando..." : "Guardar cambios"}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    width: '100%',
     flex: 1,
-    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    padding: 16,
   },
-  label: {
-    fontWeight: 'bold',
-    marginBottom: 6,
-    marginTop: 16,
+  dateContainer: {
+    marginBottom: 20,
+    alignItems: 'flex-start',
+  },
+  yearText: {
+    fontSize: 32,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  dateText: {
+    fontSize: 16,
+    color: '#666',
+    textTransform: 'capitalize',
+  },
+  formContainer: {
+    width: '100%',
+    alignItems: 'center',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
+    width: '100%',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    paddingVertical: 10,
+    marginBottom: 20,
+    fontSize: 16,
+  },
+  descriptionInput: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  button: {
+    backgroundColor: '#000',
+    padding: 15,
     borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#f9f9f9',
+    alignItems: 'center',
+    marginTop: 20,
+    width: '50%',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
