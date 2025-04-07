@@ -45,7 +45,7 @@ export default function TaskOptions({ onEdit, onDelete }: Props) {
                 setVisible(false);
               }}
             >
-              <Feather name="edit-2" size={16} color="black" />
+              <Feather name="edit-2" size={16} color="#414b64" />
               <Text style={styles.menuText}>Editar</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -92,8 +92,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 8,
+    color: "#414b64",
   },
   menuText: {
+    color: "#414b64",
     marginLeft: 8,
     fontSize: 14,
   },

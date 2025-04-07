@@ -72,12 +72,12 @@ const styles = StyleSheet.create({
   yearText: {
     fontSize: 32,
     fontWeight: '600',
-    color: '#333',
+    color: '#2e3d60',
     marginBottom: 4,
   },
   dateText: {
     fontSize: 16,
-    color: '#666',
+    color: '#2e3d60',
     textTransform: 'capitalize',
   },
   formContainer: {
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   button: {
-    backgroundColor: '#000',
+    backgroundColor: '#2e3d60',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',

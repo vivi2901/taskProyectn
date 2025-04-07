@@ -4,20 +4,20 @@ const tintColorDark = primary;
 
 export default {
   light: {
-    text: "#111827",
-    background: "#f3f4f6",
-    card: "#fff",
+    text: "#6f95c8",
+    background: "#f4f4fb",
+    card: "#f4f4fb",
     tint: tintColorLight,
-    tabIconDefault: "#e5e7eb",
+    tabIconDefault: "#455781",
     tabIconSelected: tintColorLight,
     primary,
   },
   dark: {
-    text: "#fff",
-    background: "#111827",
-    card: "#374151",
+    text: "#6f95c8",
+    background: "#f4f4fb",
+    card: "#f4f4fb",
     tint: tintColorDark,
-    tabIconDefault: "#e5e7eb",
+    tabIconDefault: "#455781",
     tabIconSelected: tintColorDark,
     primary,
   },
