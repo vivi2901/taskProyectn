@@ -29,7 +29,8 @@ export default function TabOneScreen() {
 
   useEffect(() => {
     refreshTasks();
-    const interval = setInterval(refreshTasks, 3000); // actualiza cada 3 segundos
+    //Actualizacion cada 3s
+    const interval = setInterval(refreshTasks, 3000);
     return () => clearInterval(interval);
   }, [profile]);
 

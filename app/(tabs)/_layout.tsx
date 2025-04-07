@@ -2,6 +2,7 @@ import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs, useRouter } from 'expo-router';
 import { Pressable, StyleSheet } from 'react-native';
+import { supabase } from "../../lib/supabase";
 
 export default function TabLayout() {
   const router = useRouter();
@@ -12,6 +13,11 @@ export default function TabLayout() {
         tabBarStyle: styles.tabBar,
         headerShown: true, 
         headerTitle: 'TaskFlow',
+        headerRight: () => (
+          <Pressable style={styles.logoutButton} onPress={() => supabase.auth.signOut()}>
+            <FontAwesome name="sign-out" size={20} color="black" />
+          </Pressable>
+        ),
       }}>
         
       <Tabs.Screen
@@ -24,7 +30,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="two"
         options={{
+          headerLeft: () => (
+            <Pressable style={styles.backButton} onPress={() => {router.push({ pathname: '/'});}}>
+              <FontAwesome name="chevron-left" size={15} color="black" />
+            </Pressable>
+          ),
           title: 'Nueva Tarea',
+          tabBarStyle: { display: 'none' },
           tabBarButton: () => (
             <Pressable style={styles.floatingButton} onPress={() => router.push('/two')}>
               <FontAwesome name="plus" size={28} color="white" />
@@ -36,6 +48,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="three"
         options={{
+          tabBarStyle: { display: 'none' },
+          headerLeft: () => (
+            <Pressable style={styles.backButton} onPress={() => {router.push({ pathname: '/'});}}>
+              <FontAwesome name="chevron-left" size={15} color="black" />
+            </Pressable>
+          ),
+          title: 'Editar Tarea',
           href: null, 
         }}
       />
@@ -43,19 +62,18 @@ export default function TabLayout() {
   );
 }
 
-// Estilos
 const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute',
     height: 60,
     backgroundColor: 'white',
-    borderTopWidth: 0, // Quita la línea superior en Android
+    borderTopWidth: 0,
     elevation: 0,
   },
   floatingButton: {
     position: 'absolute',
-    bottom: 10, // Ajusta la distancia desde la parte inferior
-    alignSelf: 'center', // Centra el botón en la barra
+    bottom: 10,
+    alignSelf: 'center',
     width: 65,
     height: 65,
     borderRadius: 35,
@@ -68,4 +86,11 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  logoutButton: {
+    marginRight: 20,
+  },
+  backButton: {
+    paddingLeft: 20,
+    paddingRight: 20,
+  }
 });
